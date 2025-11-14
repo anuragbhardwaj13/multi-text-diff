@@ -136,6 +136,38 @@ class DiffApp {
     this.displayResults(results, labels);
   }
 
+  /**
+   * Render text with word highlighting based on differentWords Set
+   */
+  renderWithWordHighlight(text, differentWords) {
+    if (!differentWords || differentWords.size === 0) {
+      return this.escapeHtml(text);
+    }
+
+    // Tokenize the text
+    const tokens = text.split(/(\s+)/);
+
+    return tokens
+      .map((token) => {
+        const escaped = this.escapeHtml(token);
+        // If this word (trimmed) is in the different set, highlight it
+        if (token.trim() && differentWords.has(token.trim())) {
+          return `<span class="word-diff-change">${escaped}</span>`;
+        }
+        return escaped;
+      })
+      .join("");
+  }
+
+  /**
+   * Escape HTML characters
+   */
+  escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
   displayResults(results, labels) {
     // Clear previous results
     this.diffDisplay.innerHTML = "";
@@ -166,7 +198,15 @@ class DiffApp {
         line.className = `diff-line ${cell.type}`;
 
         if (cell.exists) {
-          line.textContent = cell.content || " ";
+          // If different words exist, render with highlighting
+          if (cell.differentWords && cell.differentWords.size > 0) {
+            line.innerHTML = this.renderWithWordHighlight(
+              cell.content,
+              cell.differentWords
+            );
+          } else {
+            line.textContent = cell.content || " ";
+          }
         } else {
           line.textContent = "";
           line.innerHTML = "&nbsp;";

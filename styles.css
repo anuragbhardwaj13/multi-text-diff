@@ -346,6 +346,14 @@ h1 {
   visibility: hidden;
 }
 
+/* Word-level diff highlighting */
+.word-diff-change {
+  background: #fef08a;
+  padding: 0.125em 0.25em;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
 .legend {
   display: flex;
   gap: 2rem;
