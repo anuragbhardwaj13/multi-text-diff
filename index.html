@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Text Diff</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Multi-Text Diff</h1>
+            <p class="subtitle">Compare up to 10 texts side-by-side</p>
+        </header>
+
+        <div class="controls">
+            <button id="addText" class="btn btn-secondary">+ Add Text</button>
+            <button id="compare" class="btn btn-primary">Compare</button>
+            <button id="clear" class="btn btn-secondary">Clear All</button>
+        </div>
+
+        <div id="inputSection" class="input-section">
+            <!-- Text inputs will be added dynamically -->
+        </div>
+
+        <div id="resultSection" class="result-section hidden">
+            <div class="result-header">
+                <h2>Comparison Results</h2>
+                <button id="backToEdit" class="btn btn-secondary">← Back to Edit</button>
+            </div>
+            <div id="diffDisplay" class="diff-display">
+                <!-- Diff results will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="diff.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+
