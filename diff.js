@@ -41,18 +41,24 @@ class MultiTextDiff {
   }
 
   /**
-   * Check if two lines are similar (>50% same words)
+   * Check if two lines are similar (>=40% same words)
    */
   areSimilar(line1, line2) {
+    if (line1 === line2) return true;
+
     const words1 = this.tokenize(line1).filter((w) => w.trim());
     const words2 = this.tokenize(line2).filter((w) => w.trim());
 
     if (words1.length === 0 || words2.length === 0) return false;
 
-    const common = words1.filter((w) => words2.includes(w)).length;
+    // Count common words
+    const words1Set = new Set(words1);
+    const common = words2.filter((w) => words1Set.has(w)).length;
     const maxLen = Math.max(words1.length, words2.length);
+    const similarity = common / maxLen;
 
-    return common / maxLen > 0.5;
+    // Lower threshold to 40% for better grouping
+    return similarity >= 0.4;
   }
 
   /**
@@ -178,38 +184,36 @@ class MultiTextDiff {
       const lines = result.group.lines.filter((l) => l !== null);
       const allSame = lines.length > 1 && lines.every((l) => l === lines[0]);
 
-      // Collect all unique words from all lines to determine differences
-      const allWords = new Set();
-      lines.forEach((line) => {
-        if (line) {
-          this.tokenize(line)
-            .filter((w) => w.trim())
-            .forEach((w) => allWords.add(w));
-        }
-      });
+      // Find common words (words that appear in ALL lines)
+      let commonWords = null;
+      if (!allSame && lines.length > 1) {
+        // Get word sets for each line
+        const wordSets = lines.map(
+          (line) => new Set(this.tokenize(line).filter((w) => w.trim()))
+        );
+
+        // Find intersection (words in ALL lines)
+        commonWords = new Set(wordSets[0]);
+        wordSets.forEach((wordSet) => {
+          commonWords = new Set([...commonWords].filter((w) => wordSet.has(w)));
+        });
+      }
 
       for (let i = 0; i < numTexts; i++) {
         const occurrence = result.occurrences[i];
         let differentWords = null;
 
         // If lines exist and are not all the same, find different words
-        if (!allSame && occurrence.exists && lines.length > 1) {
-          // Find words unique to this line compared to others
-          const currentWords = new Set(
-            this.tokenize(occurrence.content).filter((w) => w.trim())
+        if (!allSame && occurrence.exists && lines.length > 1 && commonWords) {
+          // Get all words in current line
+          const currentWords = this.tokenize(occurrence.content).filter((w) =>
+            w.trim()
           );
 
+          // Words that are NOT in the common set are different
           differentWords = new Set();
           currentWords.forEach((word) => {
-            // Check if this word exists in ALL other non-null lines
-            const existsInAll = lines.every((line) => {
-              if (line === occurrence.content || line === null) return true;
-              return this.tokenize(line)
-                .filter((w) => w.trim())
-                .includes(word);
-            });
-
-            if (!existsInAll) {
+            if (!commonWords.has(word)) {
               differentWords.add(word);
             }
           });
