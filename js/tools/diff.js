@@ -266,3 +266,6 @@ class MultiTextDiff {
 class EnhancedMultiTextDiff extends MultiTextDiff {
   // Uses base class methods - no override needed
 }
+
+// Export for ES6 modules
+export { MultiTextDiff, EnhancedMultiTextDiff };
